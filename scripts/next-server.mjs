@@ -16,9 +16,15 @@ const child = spawn(nextBin, [mode, "-H", host, "-p", String(port)], {
   },
 });
 
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.on(signal, () => {
+    child.kill(signal);
+  });
+}
+
 child.on("exit", (code, signal) => {
   if (signal) {
-    process.kill(process.pid, signal);
+    process.exit(0);
     return;
   }
 

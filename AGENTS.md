@@ -356,6 +356,7 @@ W1로 진입
 ## 로컬 검증 규칙
 
 - TypeScript 검증은 `tsc` 대신 `tsgo`를 사용한다. 표준 명령은 `bun run typecheck`이며 내부 실행은 `tsgo --noEmit`이다.
+- 로컬 dev 서버 기본 포트는 `8048`이다. 포트가 남아 있으면 `bun run dev:stop`으로 `PORT`에 해당하는 listen 프로세스 트리를 종료한다.
 
 ---
 
@@ -415,6 +416,7 @@ export async function sendDiscord(payload: { content?: string; embeds?: any[] })
 | 2026-05-06 | 일일 루틴 기록 화면 1차 구현 — Next.js 앱 스캐폴드, `/today` UI, 카테고리/로그/스탯 API, XP 순수 함수, Vitest 테스트, Drizzle/RLS 마이그레이션 초안, Discord 알림 헬퍼, `.omc/` ignore 처리 | app, components, hooks, lib, drizzle, package.json, .gitignore, AGENTS.md | Forge 마일스톤 1 + 코어 화면 세로 조각 구현. Supabase 연결 전에는 in-memory store로 개발 검증 |
 | 2026-05-06 | 로컬 Next.js 서버 포트를 `PORT` 환경변수로 제어하도록 변경하고 기본 포트를 8048로 조정 | package.json, scripts/next-server.mjs, .env.example, .env.local, AGENTS.md | 3000 포트 충돌 회피 및 로컬 실행 포트 명시화 |
 | 2026-05-06 | TypeScript 검증 명령을 `tsc --noEmit`에서 `tsgo --noEmit`로 변경하고 AGENTS.md에 로컬 검증 규칙으로 기록 | package.json, AGENTS.md | 사용자 선호: 이 프로젝트에서는 tsc 대신 tsgo 사용 |
+| 2026-05-06 | 8048 포트 점유 문제 대응 — `bun run dev:stop` 추가 및 Next dev wrapper의 SIGINT/SIGTERM 전달 보강 | package.json, scripts/next-server.mjs, scripts/stop-dev.mjs, AGENTS.md | Git Bash에서 Next 자식 프로세스가 남아 `EADDRINUSE`가 반복되는 문제 해결 |
 
 ---
 
