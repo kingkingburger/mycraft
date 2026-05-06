@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/next-server.mjs dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/next-server.mjs start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "eslint": "9",
     "eslint-config-next": "15",
     "tailwindcss": "^4.2.4",
+    "@typescript/native-preview": "latest",
     "typescript": "5",
     "vitest": "^4.1.5"
   }

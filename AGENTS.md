@@ -353,6 +353,10 @@ W1로 진입
 - 새 환경변수 추가 시 3곳 동시 갱신: `.env.local` (실제 값) + `.env.example` (placeholder) + Vercel Settings (배포 단계).
 - 토큰이 채팅/공개 git/스크린샷에 한 번이라도 노출됐으면 **즉시 발급처에서 폐기 후 재발급**. 환경변수 값만 갈면 됨.
 
+## 로컬 검증 규칙
+
+- TypeScript 검증은 `tsc` 대신 `tsgo`를 사용한다. 표준 명령은 `bun run typecheck`이며 내부 실행은 `tsgo --noEmit`이다.
+
 ---
 
 ## 운영 알림 (Discord)
@@ -409,6 +413,8 @@ export async function sendDiscord(payload: { content?: string; embeds?: any[] })
 | 2026-05-06 | Discord webhook 운영 알림 추가 (.env.local 작성, .env.example 템플릿 커밋, architecture §14) | .env.local, .env.example, _workspace/architecture_daily_log.md, AGENTS.md | 운영 모니터링 + 알림 요구 발생. 토큰은 .env.local에만 보관(gitignored), 서버 전용 환경변수로 관리 |
 | 2026-05-06 | AGENTS.md SSOT에 "환경변수 정책" + "운영 알림(Discord)" 섹션 신설. 산출물 규칙에 "영구화 절차" 추가 (_workspace → AGENTS.md 또는 docs/specs/ 승격) | AGENTS.md | _workspace는 gitignored라 다음 세션 Codex/Claude가 운영 메타를 못 봄. 영구 결정은 SSOT로 승격하는 정책 명시 |
 | 2026-05-06 | 일일 루틴 기록 화면 1차 구현 — Next.js 앱 스캐폴드, `/today` UI, 카테고리/로그/스탯 API, XP 순수 함수, Vitest 테스트, Drizzle/RLS 마이그레이션 초안, Discord 알림 헬퍼, `.omc/` ignore 처리 | app, components, hooks, lib, drizzle, package.json, .gitignore, AGENTS.md | Forge 마일스톤 1 + 코어 화면 세로 조각 구현. Supabase 연결 전에는 in-memory store로 개발 검증 |
+| 2026-05-06 | 로컬 Next.js 서버 포트를 `PORT` 환경변수로 제어하도록 변경하고 기본 포트를 8048로 조정 | package.json, scripts/next-server.mjs, .env.example, .env.local, AGENTS.md | 3000 포트 충돌 회피 및 로컬 실행 포트 명시화 |
+| 2026-05-06 | TypeScript 검증 명령을 `tsc --noEmit`에서 `tsgo --noEmit`로 변경하고 AGENTS.md에 로컬 검증 규칙으로 기록 | package.json, AGENTS.md | 사용자 선호: 이 프로젝트에서는 tsc 대신 tsgo 사용 |
 
 ---
 
