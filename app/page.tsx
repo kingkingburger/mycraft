@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { SeasonCommand } from "@/components/season/SeasonCommand";
 
 export default function HomePage() {
-  redirect("/today");
+  return <SeasonCommand />;
 }

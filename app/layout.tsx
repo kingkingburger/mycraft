@@ -4,7 +4,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "mycraft",
-  description: "Daily routine tracker with XP, levels, and stat growth.",
+  description: "Personal season challenge command center.",
 };
 
 export default function RootLayout({

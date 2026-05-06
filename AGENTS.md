@@ -417,6 +417,8 @@ export async function sendDiscord(payload: { content?: string; embeds?: any[] })
 | 2026-05-06 | 로컬 Next.js 서버 포트를 `PORT` 환경변수로 제어하도록 변경하고 기본 포트를 8048로 조정 | package.json, scripts/next-server.mjs, .env.example, .env.local, AGENTS.md | 3000 포트 충돌 회피 및 로컬 실행 포트 명시화 |
 | 2026-05-06 | TypeScript 검증 명령을 `tsc --noEmit`에서 `tsgo --noEmit`로 변경하고 AGENTS.md에 로컬 검증 규칙으로 기록 | package.json, AGENTS.md | 사용자 선호: 이 프로젝트에서는 tsc 대신 tsgo 사용 |
 | 2026-05-06 | 8048 포트 점유 문제 대응 — `bun run dev:stop` 추가 및 Next dev wrapper의 SIGINT/SIGTERM 전달 보강 | package.json, scripts/next-server.mjs, scripts/stop-dev.mjs, AGENTS.md | Git Bash에서 Next 자식 프로세스가 남아 `EADDRINUSE`가 반복되는 문제 해결 |
+| 2026-05-06 | 제품 방향 전환 초안 작성 — 기록 앱 중심에서 시즌 챌린지 운영 체계로 전환. 월간 시즌, 주간 에피소드, 일간 미션 생성 루프 정의 | docs/specs/season-challenge-quest.md, docs/specs/season-challenge-design.md, AGENTS.md | 기존 Today 중심 UI가 너무 평범하고 클릭이 많으며 월/주/일 계획 생성과 챌린지성이 부족하다는 피드백 반영 |
+| 2026-05-06 | 루트 화면을 `/today` 리다이렉트에서 Season Command 화면으로 변경. 기존 Today 기록은 Quick Log 진입점으로 낮춤 | app/page.tsx, app/layout.tsx, app/globals.css, components/season/SeasonCommand.tsx, AGENTS.md | 첫 화면 체감을 기록 카드 목록에서 시즌 작전판으로 전환하고 클릭 많은 입력 중심 UX를 완화 |
 
 ---
 
