@@ -305,16 +305,26 @@ W1로 진입
 
 ## 기술 스택
 
-**현재 상태: 미정**
-
-첫 아키텍처 결정은 Dungeon Architect 페르소나가 사용자와 합의 후 이 섹션을 갱신한다. 결정 전까지는 어떤 페르소나도 특정 스택을 가정하지 않는다.
+**현재 상태: 확정 (2026-05-06)**
 
 | 항목 | 결정 | 결정일 | 결정 근거 |
 |------|------|--------|----------|
-| 프론트엔드 | (미정) | - | - |
-| 백엔드 | (미정) | - | - |
-| DB | (미정) | - | - |
-| 호스팅 | (미정) | - | - |
+| 패키지 매니저 / 로컬 런타임 | bun (`bun install`, `bun dev`) | 2026-05-06 | npm 거부, 빠른 install, Vercel 자동 감지 |
+| 프론트엔드 | Next.js 15 (App Router, RSC) + TypeScript + Tailwind v4 | 2026-05-06 | TS 풀스택 단순함, 사용자 선호, Vercel 통합 |
+| 백엔드 / API | Next.js Route Handlers (`app/api/*/route.ts`) | 2026-05-06 | 프론트와 한 코드베이스, 비즈니스 로직 자리 명확 |
+| DB | Supabase Postgres (Cloud Free 티어) | 2026-05-06 | 무료 500MB로 1년+ 충분, RLS, supabase-js |
+| 인증 | Supabase Auth — Magic Link | 2026-05-06 | 1인 사용자라 비번 관리 불필요 |
+| 호스팅 (DB/Auth) | Supabase Cloud Free | 2026-05-06 | 무료, 자동 운영, 다기기 인터넷 접근 자동 |
+| 호스팅 (앱) | Vercel Free (Hobby) | 2026-05-06 | Next.js native, 무료, 1초 배포 |
+| ORM | Drizzle ORM | 2026-05-06 | 타입 안정성, 명시적 마이그레이션 |
+| 상태/패치 | TanStack Query v5 (optimistic) | 2026-05-06 | 즉시 피드백 핵심 |
+| 애니메이션 | CSS transitions + Framer Motion (필요 곳만) | 2026-05-06 | XP 토스트·레벨업 모달은 Framer Motion |
+
+**v1 비포함:** Supabase Realtime / Storage / Edge Functions / 오프라인 IndexedDB sync — 필요해지면 v2.
+
+**다기기 접근:** 인터넷 (Vercel + Supabase). 별도 VPN/터널 불필요.
+
+**상세 결정 근거 + 데이터 모델 + API 명세:** `_workspace/architecture_daily_log.md` (Forge 인계 시 시작점).
 
 ---
 
@@ -323,6 +333,67 @@ W1로 진입
 - 중간 산출물: `_workspace/{phase}_{persona}_{topic}.{ext}` (예: `_workspace/01_quest_xp_system.md`).
 - 최종 산출물: 사용자 지정 경로 또는 코드는 프로젝트 루트.
 - 이전 워크플로우의 `_workspace/`가 남아 있는데 새 작업이 시작되면, 기존 폴더를 `_workspace_prev_{date}/`로 이동한다.
+- **영구화 절차** — `_workspace/`는 `.gitignore`로 추적되지 않아 다음 세션의 Claude/Codex가 보지 못한다. 따라서 작업이 완료되고 다음 세션에서도 참조해야 할 결정은 둘 중 한 곳으로 승격한다:
+  - **핵심 정책·운영 결정·기술 스택**: 이 AGENTS.md(SSOT)에 짧은 섹션으로 직접 기록 (Codex/Claude 모두 즉시 접근).
+  - **상세 설계·명세·마일스톤**: `docs/specs/{name}.md`로 사본 또는 이동 (git 추적). AGENTS.md에서 "상세는 docs/specs/X.md 참조" 식으로 포인터.
+  - 승격 책임은 Sage 페르소나(변경 이력 기록과 함께).
+
+---
+
+## 환경변수 정책
+
+| 파일 | 추적 여부 | 용도 |
+|------|---------|------|
+| `.env.local` | ❌ `.gitignore` 처리 | 로컬 dev — **실제 값 보관**. 절대 커밋 금지 |
+| `.env.example` | ✅ 커밋 | 템플릿 (placeholder만). 새 환경변수 추가 시 동기 갱신 |
+| Vercel Env Vars | (외부 시스템) | 프로덕션 — Vercel Project Settings > Environment Variables 에 동일 키 등록 |
+
+### 규칙
+- `NEXT_PUBLIC_` 접두사가 붙으면 브라우저 번들에 노출된다. **비밀값에는 절대 사용 금지** (Discord webhook, service role key, DB password 등).
+- 새 환경변수 추가 시 3곳 동시 갱신: `.env.local` (실제 값) + `.env.example` (placeholder) + Vercel Settings (배포 단계).
+- 토큰이 채팅/공개 git/스크린샷에 한 번이라도 노출됐으면 **즉시 발급처에서 폐기 후 재발급**. 환경변수 값만 갈면 됨.
+
+---
+
+## 운영 알림 (Discord)
+
+mycraft는 운영 이벤트를 Discord webhook으로 알린다.
+
+### 환경변수
+- `DISCORD_WEBHOOK_URL` — **서버 전용**. NEXT_PUBLIC_ 접두사 금지.
+
+### 코드 패턴
+```ts
+// lib/notifications/discord.ts
+export async function sendDiscord(payload: { content?: string; embeds?: any[] }) {
+  const url = process.env.DISCORD_WEBHOOK_URL;
+  if (!url) return;  // 환경변수 없으면 silent skip (테스트 환경)
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.error('discord webhook failed', e);  // 알림 실패가 본 작업을 막지 않게
+  }
+}
+```
+
+### v1 트리거
+- API 5xx 에러 발생 (rate limit: 동일 메시지 1시간에 1회).
+- 마이그레이션 실패.
+
+### v2 (사용자 옵트인 알림)
+- 레벨업 시.
+- 7일 미접속 리마인더 (Vercel Cron).
+- 주간 리뷰 완료 시 요약.
+
+### 보안
+- webhook URL은 **서버에서만** import. 클라이언트 코드 사용 금지.
+- 토큰 노출 시 Discord 채널 설정 → Integrations → Webhooks에서 삭제 후 재발급, `.env.local` 갱신.
+
+상세 설계: `_workspace/architecture_daily_log.md` §14 (Forge 구현 시작 후 `docs/specs/`로 승격 예정).
 
 ---
 
@@ -332,6 +403,11 @@ W1로 진입
 |------|----------|------|------|
 | 2026-05-06 | 초기 하네스 구성 (5인 길드 + 4개 스킬 + AGENTS.md/CLAUDE.md) | 전체 | 신규 프로젝트 부트스트랩 |
 | 2026-05-06 | Artisan(장인) 페르소나 추가 — 6인 길드 확장. W1에 디자인 단계 삽입, 트리거 규칙에 디자인 키워드 추가 | .claude/agents/artisan.md, AGENTS.md, CLAUDE.md, mycraft-orchestrator | 기획·디자인·개발 풀 사이클 진입 직전 디자인 페르소나 부재 발견 |
+| 2026-05-06 | 첫 기능 "일일 루틴 기록 화면" — Quest Master / Artisan 산출물 작성 | _workspace/quest_daily_log.md, _workspace/design_daily_log.md | mycraft 첫 핵심 기능 정의 + 디자인 명세 |
+| 2026-05-06 | 기술 스택 확정 (W4) — Next.js 15 + Supabase Cloud Free + Vercel + Drizzle + Tailwind v4 + TanStack Query | AGENTS.md "기술 스택" 섹션, _workspace/architecture_daily_log.md | mycraft 도메인(1인 사용자, 즉시 피드백, 다기기 동기화)에 가장 단순한 풀스택 조합 합의 |
+| 2026-05-06 | 패키지 매니저 bun 채택. docker compose 미채택 확정 (Vercel+Supabase Cloud로 충분) | AGENTS.md, _workspace/architecture_daily_log.md | npm 거부 + 도커 운영 불필요 (호스팅 외부화) |
+| 2026-05-06 | Discord webhook 운영 알림 추가 (.env.local 작성, .env.example 템플릿 커밋, architecture §14) | .env.local, .env.example, _workspace/architecture_daily_log.md, AGENTS.md | 운영 모니터링 + 알림 요구 발생. 토큰은 .env.local에만 보관(gitignored), 서버 전용 환경변수로 관리 |
+| 2026-05-06 | AGENTS.md SSOT에 "환경변수 정책" + "운영 알림(Discord)" 섹션 신설. 산출물 규칙에 "영구화 절차" 추가 (_workspace → AGENTS.md 또는 docs/specs/ 승격) | AGENTS.md | _workspace는 gitignored라 다음 세션 Codex/Claude가 운영 메타를 못 봄. 영구 결정은 SSOT로 승격하는 정책 명시 |
 
 ---
 
