@@ -13,7 +13,7 @@
 Codex와 달리 Claude Code는 다음 자원을 추가로 사용할 수 있다.
 
 - **에이전트 정의**: `.claude/agents/{name}.md`
-  - `quest-master`, `dungeon-architect`, `forge`, `hunter`, `sage` (5개)
+  - `quest-master`, `artisan`, `dungeon-architect`, `forge`, `hunter`, `sage` (6개)
   - 각 파일은 AGENTS.md의 해당 페르소나 섹션을 인터페이스 형식으로 노출한다 (model: opus 명시).
   - 호출 방법: Agent 도구의 `subagent_type`으로 지정.
 
