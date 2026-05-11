@@ -1,9 +1,0 @@
-{
-  "name": "mycraft",
-  "short_name": "mycraft",
-  "start_url": "/today",
-  "display": "standalone",
-  "background_color": "#0f1411",
-  "theme_color": "#18201b",
-  "description": "Daily routine tracker with XP, levels, and stat growth."
-}
